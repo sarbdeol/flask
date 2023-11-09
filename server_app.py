@@ -149,7 +149,7 @@ def start_scraper():
                 
 
 
-            try:
+            try:    
                 print("try part...........")
                 # This part for Indian Amazon account_________
                 if driver.find_element(By.XPATH,"//span[text()='Enter verification code']"):
