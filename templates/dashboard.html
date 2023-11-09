@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Page Title</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    
+    
+        
+    <style>
+        /* CSS for the loading modal */
+        .modal-content {
+            text-align: center;
+        }
+
+        .spinner-border {
+            margin-top: 20px;
+        }
+
+        .disabled {
+        background-color: #ccc;
+        color: #666;
+        cursor: not-allowed;
+        }
+
+        .grayColor {
+      background-color: gray;
+      color: white;
+    }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <button id="homeButton" class="btn btn-primary">Go back Registration</button>
+        <div>
+            <p id="download_csv" class="container mt-5" style="display: none;">
+                <a href="{{ url_for('download_csv') }}" download="order_data.csv">Download CSV</a>
+            </p>
+        </div>
+
+        <h1>Welcome, {{ user_name }}</h1>
+        
+        <p id="useremail" hidden>{{ user_name }}</p>
+        <p id="userpass" hidden>{{ user_pass }}</p>
+
+        
+
+
+    
+        <p id="pageNo" hidden >Current Page:</p>
+        <p id="pageLength" hidden>Page Length: </p>
+        <p id="pageLeft" hidden> Page Lefts</p>
+      
+
+
+        <div id="image-container" style="display: none;">
+            <img id="current-image" src="" alt="Image" style="width: 270px; height: 170px;">
+        </div>
+        
+
+        <p id="no-image" style="display: none;">No image to display.</p>
+
+        <!-- <p id="download_csv" style="display: none;">
+            <a href="{{ url_for('download_csv') }}" download="order_data.csv">Download CSV</a>
+        </p> -->
+
+
+
+        
+        <!-- Start Button -->
+        <button class="btn btn-success" id="startButton">Start</button>
+        <!-- Stop Button -->
+        <button class="btn btn-danger" id="stopButton">Stop</button>
+
+        
+        <!-- OTP Modal -->
+        <!-- <div class="modal fade" id="otpModal" tabindex="-1" role="dialog" aria-labelledby="otpModalLabel" aria-hidden="true"> -->
+        <div class="modal fade" id="otpModal" tabindex="-1" role="dialog" aria-labelledby="otpModalLabel" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="otpModalLabel">Enter OTP</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="alert alert-danger" id="otpError" style="display: none;">
+                                Invalid OTP. Please try again.
+                            </div>
+                            <label for="otp">One-Time Password (OTP)</label>
+                            <input type="text" class="form-control" id="otp" name="otp" placeholder="Enter OTP" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+                        <button type="button" class="btn btn-primary btncls" id="submitOTP">Submit OTP</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- OTP Modal End-->
+
+        <!-- Page loading modal -->
+        <div class="modal" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <p class="mt-3">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+ 
+        <!-- Captcha Modal --> 
+        <div class="modal fade" id="captchaModal" tabindex="-1" role="dialog" aria-labelledby="captchaModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <!-- <div class="modal fade" id="captchaModal" tabindex="-1" role="dialog" aria-labelledby="captchaModalLabel" aria-hidden="true"> -->
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="captchaModalLabel">Enter Captcha</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="alert alert-danger" id="captchaError" style="display: none;">
+                                Invalid Captcha. Please try again.
+                            </div>
+                            <label for="captcha">Captcha</label>
+                            <input type="text" class="form-control" id="captcha" name="captcha" placeholder="Enter Captcha" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+                        <button type="button" class="btn btn-primary btncls" id="submitcaptcha">Submit Captcha</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Captcha Modal End -->
+
+
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            
+
+            $("#homeButton").click(function() {
+                window.location.href = "/";
+            });
+            
+
+            $("#captchaModal .close").click(function() {
+                $("#captchaModal").modal("hide");
+            });
+
+            $("#otpModal .close").click(function() {
+                $("#otpModal").modal("hide");
+            });
+
+
+           
+            $("#startButton").click(function() {
+
+                $(this).removeClass('btn-success').addClass('grayColor').prop('disabled', true);
+ 
+                $("#loadingModal").modal("show");
+                $("body").addClass("disable-body");
+                
+                var UserEmail = $("#useremail").text();
+                var UserPass = $("#userpass").text();
+                var data = {
+                    email: UserEmail,
+                    password: UserPass
+                };
+                $.ajax({
+                    type: "POST",
+                    url: "/start_scraper",
+                    data: JSON.stringify({ email: UserEmail, password: UserPass }),
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.Order_Scrapped === true) {
+                            console.log("Successfully scrapped Orders Done...");
+                            $("#loadingModal").modal("hide");
+                            alert("Successfully scrapped Orders Done...");
+                            $("#download_csv").show();
+
+                        }
+
+                        if (response.current_page !== undefined) {
+                           
+                            $("#currentPage").text("Current Page: " + response.current_page);
+                        }
+
+                       
+                    
+             
+                        if (response.status === true) {
+                            
+              
+                            setTimeout(function() {
+                                
+                                
+                                $("#loadingModal").modal("hide");
+                            }, 3000); // Change the duration as needed
+                            console.log("chkya km");
+                            $('#otpModal').modal('show');
+                            
+                    
+                            $('#captchaModal').modal('hide');
+
+                        }
+
+                        // Show Pagination.......................
+                        // if (response.ShowImage === true) {
+                        // }
+
+
+       
+
+                        if (response.ShowImage === true) {
+                            $('#captchaModal').modal('show');
+                            setTimeout(function() {
+                                $("#loadingModal").modal("hide");
+                            }, 3000); // Change the duration as needed
+          
+                                $("#showimg").show();
+                                $("#image-container").show();
+                                $("#no-image").hide();
+                       
+                                $("#image-container img#current-image").attr("src", response.image_url);
+                            } else {
+                                $("#loader").hide();
+                                $('#captchaModal').modal('hide');
+                                $("#showimg").hide();
+                                $("#image-container").hide();
+                                $("#no-image").show();
+                            }
+          
+                    },
+                    error: function(error) {
+                        console.error(error);
+                        setTimeout(function() {
+                                $("#loadingModal").modal("hide");
+                            }, 3000); // Change the duration as needed
+                    }
+                });
+            });
+  
+
+
+            $("#submitOTP").click(function() {
+                $("#loadingModal").modal("show");
+                var otpValue = $("#otp").val(); // Get OTP value from the input field
+                var UserEmail = $("#useremail").text();
+                var UserPass = $("#userpass").text();
+                $('#otpModal').modal('hide');
+                var data = {
+                    email: UserEmail,
+                    password: UserPass,
+                    otp: otpValue, // Include OTP value in the data
+                    };
+                $.ajax({
+                    type: "POST",
+                    url: "/submit_otp",
+                    data: JSON.stringify(data),
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.Scrap_Success === true) {
+                           
+                            console.log("Successfully scrapped Orders Done...");
+                            $("#loadingModal").modal("hide");
+                            alert("Successfully scrapped Orders Done...");
+                            $("#download_csv").show();
+                            }
+                        
+                        if (response.status === true) {
+                            setTimeout(function() {
+                                $("#loadingModal").modal("hide");
+                            }, 3000); // Change the duration as needed
+                            alert("Otp true");
+                            console.log("OTP submitted successfully.");
+                        } else {
+                            // Show the error message if the OTP is invalid
+                            setTimeout(function() {
+                                $("#loadingModal").modal("hide");
+                            }, 3000); // Change the duration as needed
+                            $("#otpError").show();
+                            $('#otpModal').modal('show');
+                            $("#otp").val("");
+                        }
+                    },
+                    error: function(error) {
+                        console.error(error);
+                    }
+                });
+            });
+            $("#otpModal").on('hidden.bs.modal', function () {
+            // Hide the form and reset the alerts
+            $("#otpError").hide();
+
+            // Clear the OTP input field when the modal is closed
+            $("#otp").val("");
+        });
+
+
+        // Captch Scrip_________________________
+        $("#submitcaptcha").click(function() {
+            $("#loadingModal").modal("show");
+                
+                var captchaValue = $("#captcha").val(); // Get OTP value from the input field
+                var UserEmail = $("#useremail").text();
+                var UserPass = $("#userpass").text();
+                $('#captchaModal').modal('hide');
+        
+
+                var data = {
+                    email: UserEmail,
+                    password: UserPass,
+                    captcha: captchaValue, // Include OTP value in the data
+                    UserPass:UserPass
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: "/submit_captcha",
+                    data: JSON.stringify(data),
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function(response) {
+
+                        if (response.Correct_Captcha === true) {
+                        
+                                $("#captchaModal").modal("hide");
+                            }
+                   
+
+
+                        if (response.status === true) {
+                            setTimeout(function() {
+                                $("#loadingModal").modal("hide");
+                            }, 3000); // Change the duration as needed
+                            $('#captchaModal').modal('hide');
+                            console.log("Captcha submitted successfully.");
+                            if (response.ShowImage === false) {
+                                // Show the OTP model
+                                // Replace '#otpModal' with the selector for your OTP modal
+                                $('#otpModal').modal('show');
+
+                   
+                            }
+                        } else {
+                            setTimeout(function() {
+                                $("#loadingModal").modal("hide");
+                            }, 3000); // Change the duration as needed
+                            // Show the error message if the OTP is invalid
+                            $("#captchaError").show();
+                            $('#captchaModal').modal('show');
+                            $("#captcha").val("");
+                            // Hide the image with the ID "current-image"
+                            $("#image-container img#current-image").hide();
+                            
+           
+
+                            if (response.wrong_captcha === true) {
+                                setTimeout(function() {
+                                $("#loadingModal").modal("hide");
+                            }, 3000); // Change the duration as needed
+                   
+                                
+                                
+
+                                // Make a request to handle invalid captcha
+                                $.ajax({
+                                    type: "GET",
+                                    url: "/handle_invalid_captcha",
+                                    success: function(response) {
+                                        console.log(response);
+                                        if (!response.wrong_captcha) {
+                                            
+                                            $("#image-container img#current-image").attr("src", response.image_url).show();
+                                        }
+                                    }
+                                });
+                            };
+                        
+
+
+
+
+                        }
+                    },
+                    error: function(error) {
+                        console.error(error);
+                        setTimeout(function() {
+                                $("#loadingModal").modal("hide");
+                            }, 3000); // Change the duration as needed
+                    }
+                });
+            });
+            $("#captchaModal").on('hidden.bs.modal', function () {
+            // Hide the form and reset the alerts
+            $("#captchaError").hide();
+
+            // Clear the OTP input field when the modal is closed
+            $("#captcha").val("");
+        });
+        // Captch Scrip End_________________________
+ 
+        // ___________________Stop Script____________________
+        $("#stopButton").click(function() {
+        
+            $(this).removeClass('btn-danger').addClass('grayColor').prop('disabled', true);
+            setTimeout(function() {
+          console.log("yess");
+        }, 8000);
+            
+ 
+                $.ajax({
+                    type: "POST",
+                    url: "/stop_scraper",
+                    success: function(data) {
+                        if (data.stopped) {
+                            console.log("Stop Script");
+    
+                            $(this).addClass('btn-success').addClass('grayColor').prop('disabled', false);
+        
+                            $("#loader").hide();
+                            location.reload();
+                        }
+                    }
+                });
+            });
+
+
+    
+        });
+    </script>
+    <script src="/static/js/script.js"></script>
+   
+</body>
+</html>
